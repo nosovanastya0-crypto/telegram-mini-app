@@ -55,6 +55,19 @@ const dateKey=d=>[d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(
 const today=dateKey(new Date()); let day=today;
 const toDate=k=>new Date(k+'T12:00:00');
 const shift=(k,delta)=>{const d=toDate(k);d.setDate(d.getDate()+delta);return dateKey(d)};
+// Demo meals carried an alias from the catalog. User-saved meals never did.
+let removedDemoMeals = false;
+for (const dayLog of Object.values(state.days)) {
+  if (!Array.isArray(dayLog?.meals)) continue;
+  const realMeals = dayLog.meals.filter(meal => !fallback.some(example =>
+    ['alias', 'name', 'grams', 'kcal', 'p', 'f', 'c', 'time'].every(field => meal?.[field] === example[field])
+  ));
+  if (realMeals.length !== dayLog.meals.length) {
+    dayLog.meals = realMeals;
+    removedDemoMeals = true;
+  }
+}
+if (removedDemoMeals) save();
 const current=()=>state.days[day]??{meals:[],water:[]};
 const update=()=>state.days[day]??=current();
 const num=n=>new Intl.NumberFormat('ru-RU',{maximumFractionDigits:1}).format(n);
