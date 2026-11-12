@@ -68,7 +68,6 @@ document.querySelector('#tg').addEventListener('load',telegram);
 telegram();
 function say(message){clearTimeout(timer);status.textContent=message;timer=setTimeout(()=>status.textContent='',2800)}
 function save(){try{localStorage.setItem(key,JSON.stringify(state));storageNotice=''}catch{storageNotice='Изменения видны до закрытия страницы. Сохранить их в браузере не удалось.'}}
-function seed(){if(state.days[today])return;state.days[today]={meals:examples.slice(0,3).map(item=>({...item,id:uid()})),water:[{id:uid(),ml:250,time:'09:00'},{id:uid(),ml:500,time:'12:30'}]};save()}
 function valid(items){return Array.isArray(items)&&items.length>=3&&items.every(x=>x&&['id','name','alias','icon','meal','time'].every(k=>typeof x[k]==='string')&&['grams','kcal','p','f','c'].every(k=>Number.isFinite(x[k])&&x[k]>=0)&&x.grams>0)}
 const button=(act,label,cls='')=>'<button type="button" data-act="'+act+'" class="'+cls+'">'+label+'</button>';
 const track=(n,max,color)=>'<div class="track" aria-hidden="true"><i style="width:'+pct(n,max)+'%;--bar:'+color+'"></i></div>';
@@ -120,5 +119,5 @@ let photoRequest=0;
 document.addEventListener('change',async event=>{if(event.target.id!=='photo')return;const file=event.target.files[0];if(!file)return;const target=draft,request=++photoRequest;try{const url=URL.createObjectURL(file);try{const img=new Image();img.src=url;await img.decode();const ratio=Math.min(1,480/Math.max(img.width,img.height));const canvas=document.createElement('canvas');canvas.width=Math.max(1,Math.round(img.width*ratio));canvas.height=Math.max(1,Math.round(img.height*ratio));canvas.getContext('2d').drawImage(img,0,0,canvas.width,canvas.height);if(draft!==target||page!=='photo'||request!==photoRequest)return;target.photo=canvas.toDataURL('image/jpeg',.7);render()}finally{URL.revokeObjectURL(url)}}catch{if(draft===target&&page==='photo'&&request===photoRequest)say('Фото не открылось. Выберите JPG, PNG или WebP.')}});
 app.innerHTML='<p class="dim">Загружаем дневник…</p>';
 const controller=new AbortController(), timeout=setTimeout(()=>controller.abort(),2200);
-fetch('data.json?v='+Date.now(),{cache:'no-store',signal:controller.signal}).then(r=>{if(!r.ok)throw Error(r.status);return r.json()}).then(data=>{if(!valid(data))throw Error('format');examples=data}).catch(()=>{sourceNotice='Используется встроенный демо-каталог.'}).finally(()=>{clearTimeout(timeout);seed();render()});
+fetch('data.json?v='+Date.now(),{cache:'no-store',signal:controller.signal}).then(r=>{if(!r.ok)throw Error(r.status);return r.json()}).then(data=>{if(!valid(data))throw Error('format');examples=data}).catch(()=>{sourceNotice='Используется встроенный демо-каталог.'}).finally(()=>{clearTimeout(timeout);render()});
 </script></body></html>
